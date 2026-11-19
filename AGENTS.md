@@ -36,7 +36,7 @@ node scripts/github-research.mjs          # GitHub 星数调研（走代理，�
 
 ## 关键约定
 
-- Desktop 宿主实测为 0.2.1-rc.3（npm latest 标签为 0.2.1-rc.2，desktop 走 nightly 通道）；开发候选保留 client.platform=web。桌面包管理只能用桌面自带 CLI 与 desktop profile。升级提示按 dsh-app: 区分环境，不把网页端的更新与重启指令给桌面用户；离线通过不等于真实桌面验收。
+- Desktop 宿主实测为 0.2.2-rc.5（0.2.1 线仍在支持范围内）；开发候选保留 client.platform=web。桌面包管理只能用桌面自带 CLI 与 desktop profile。升级提示按 dsh-app: 区分环境，不把网页端的更新与重启指令给桌面用户；离线通过不等于真实桌面验收。
 - 客户端设置持久化于 localStorage `dsh-usage:settings:v1`；`defaultSettings()` 即产品预设，改动需同步 e2e 断言。
 - 服务端缓存版本变更必须同步升 `CACHE_VERSION`（usage-cache.json 当前 v6），旧缓存自动失效重算。
 - 单条会话读取/关闭失败不得拖垮其他用量；失败记录清除旧折叠缓存且下次重试，API 必须返回 coverage（宿主列出的 totalSessions/countedSessions/skippedSessions，附 per-session reason）。partial 显示精确的可读小计 + 可展开告警，数值不加「≥」前缀；全部为 `unsupported-format`（旧格式遗留）时告警降级为静默样式，其他原因才显示警示点；unavailable 的 total=null、界面为「—」，不可当成零或宣称完整统计；会话列表整体失败仍为错误。只经官方 read handle，不降级解压/改写真实历史日志。
@@ -52,6 +52,7 @@ node scripts/github-research.mjs          # GitHub 星数调研（走代理，�
 - 宿主侧依赖只写 `peerDependencies`（`@deepseek-ai/cordis` + 实际注入的 `@deepseek-ai/dsh-*`）；市场卡片的「符合宿主要求」只按这个声明展示，只写 `engines.dsh` 会显示「宿主依赖未知」。新增注入的服务要同步补 peer。
 - 发版：`package.json` 版本与 git tag 必须一致（裸版本号 + annotated tag）；市场按 tag 读取仓库里的 `package.json` 校验版本，`npm pack` 产物需重命名为 `dsh-usage-dock.tgz` 再挂到该 tag 的 release，与 catalog 的 floating asset 名保持一致。
 - 峰谷计价口径集中在 `lib/usage.js`：`PEAK_HOLIDAYS` 是唯一节假日表，`holidayCoverageAt` 负责报告表覆盖不到的年份，跨年补表时同步更新它。
+- 供应商 id 口径：DeepSeek 官方路由在 0.2.2 起是 `deepseek-account`（账户登录，`mode: "account"`、`account.scheme` 为 null），0.2.1 及更早是 `deepseek-official`。两者都必须在 `balanceSchemeOf` 里映射到 `deepseek`，否则 `pricingFor` 的「只给官方路由套人民币价目表」守卫会跳过它（`costMeta.unpriced` 出现该 model key，整天花费一律 `null`），账户余额也会被客户端当成「无公开余额接口」。宿主新增或改名路由时，同步改映射 + 补 test-balance 与 test-e2e 断言。
 
 ## 深入文档
 
