@@ -553,6 +553,8 @@ await test("switching provider shows its not-configured state", async () => {
 await test("account login is selectable without an HTTP balance scheme", async () => {
 	// Account login reports scheme null (the host signs the request) but can
 	// still answer a balance; filtering on scheme alone hid it from the UI.
+	// The balance payload must carry the same null scheme the host really sends,
+	// otherwise the dock only looks right because the fixture stole a scheme.
 	const original = PROVIDERS.splice(0, PROVIDERS.length);
 	PROVIDERS.push({
 		id: "deepseek-account",
@@ -564,12 +566,27 @@ await test("account login is selectable without an HTTP balance scheme", async (
 		fetchedAt: Date.now(),
 		balance: { isAvailable: true, currency: "CNY", total: "128.00", granted: "0.00", toppedUp: "128.00" }
 	});
+	balanceAccount = {
+		id: "deepseek-account",
+		displayName: "DeepSeek Account",
+		scheme: null,
+		mode: "account",
+		status: "ok",
+		fetchedAt: Date.now(),
+		balance: { isAvailable: true, currency: "CNY", total: "128.00", granted: "0.00", toppedUp: "128.00" }
+	};
 	await freshMount();
 	assert.ok(fetchCalls.some((url) => url.includes("/api/usage/balance?provider=deepseek-account")), "the account route is queried");
 	assert.equal(q(".u_balanceLineValue").textContent, "¥128.00", "the account balance reaches the dock");
 	await openPanel();
+	await sleep(100);
 	assert.ok(q("[data-dsh-usage-panel]").textContent.includes("DeepSeek 账户"), "the account provider is named in the panel");
 	assert.ok(!q("[data-dsh-usage-panel]").textContent.includes(t("balance.noProvider")), "no false 'no provider' copy");
+	assert.ok(!q("[data-dsh-usage-panel]").textContent.includes(t("balance.unsupported")), "a null scheme is not 'unsupported'");
+	const grid = q("[data-dsh-usage-panel] .u_balanceGrid");
+	assert.ok(grid !== null, "the account wallet renders its detail instead of a hint");
+	assert.ok(grid.textContent.includes("¥128.00"), "the panel shows the account amount");
+	balanceAccount = null;
 	PROVIDERS.splice(0, PROVIDERS.length, ...original);
 });
 

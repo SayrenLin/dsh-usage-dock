@@ -154,6 +154,10 @@ await test("unknown scheme throws", async () => {
 await test("balanceSchemeOf maps adapter ids and pi-ai routes", () => {
 	assert.equal(balanceSchemeOf("deepseek-official"), "deepseek");
 	assert.equal(balanceSchemeOf("deepseek"), "deepseek");
+	// DSH 0.2.2 lists the account-signed DeepSeek route under this id; it is the
+	// same endpoint and CNY price list, so leaving it unmapped dropped both the
+	// spend number and the account balance from the dock.
+	assert.equal(balanceSchemeOf("deepseek-account"), "deepseek");
 	assert.equal(balanceSchemeOf("openrouter"), "openrouter");
 	assert.equal(balanceSchemeOf("moonshotai"), "moonshot");
 	assert.equal(balanceSchemeOf("moonshotai-cn"), "moonshot");

@@ -443,6 +443,14 @@ await test("official CNY prices only apply to DeepSeek's own route", async () =>
 	assert.equal(price.peakAware, true, "the published list has an off-peak half price");
 	const foreign = await pricingFor(bareCtx, ["openrouter/deepseek-flash"]);
 	assert.equal(foreign.prices.get("openrouter/deepseek-flash"), void 0, "a resold DeepSeek model is not the official endpoint");
+	// DSH 0.2.2 moved the built-in route to the account id; it is still DeepSeek's
+	// own endpoint, so history recorded under it must keep the CNY price (and the
+	// peak/off-peak split) instead of collapsing to an unpriced dash.
+	const account = await pricingFor(bareCtx, ["deepseek-account/deepseek-flash"]);
+	const accountPrice = account.prices.get("deepseek-account/deepseek-flash");
+	assert.ok(accountPrice !== void 0, "the account-signed route is priced from the CNY list");
+	assert.equal(accountPrice.peakAware, true, "the account route keeps the off-peak half price");
+	assert.equal(account.source, "official", "no catalog fallback is involved");
 });
 
 await test("catalog prices are converted from USD and marked flat", async () => {
