@@ -47,7 +47,7 @@ DeepSeek Harness（`dsh web` / Windows 桌面版）的用量与余额悬浮卡�
 
 ## 安装
 
-要求 DSH `>= 0.2.1-rc.2`。
+要求 DSH `>= 0.2.1-rc.2`。DSH `0.2.2` 起内置路由改由账户登录承载（provider id `deepseek-account`），本插件已适配：花费仍按官方人民币价目表（含峰谷五折）计算，余额由宿主账号服务代答，不走公开余额接口。
 
 **从 Market**：在 DSH 的 Market 里搜索 `dsh-usage-dock` 安装。
 
